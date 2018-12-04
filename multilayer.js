@@ -1,4 +1,5 @@
 const synaptic = require('synaptic');
+const exporter = require('./exporter.js');
 
 var A = require('./res/A.json')
 var B = require('./res/B.json')
@@ -13,20 +14,9 @@ var trainingSet = A50.concat(B50, C50);
 const Layer = synaptic.Layer;
 const Network = synaptic.Network;
 const Trainer = synaptic.Trainer;
-const Neuron = synaptic.Neuron;
+const Architect = synaptic.Architect;
 
-const inputLayer = new Layer(625);
-const hiddenLayer = new Layer(300);
-const outputLayer = new Layer(3);
-
-inputLayer.project(hiddenLayer);
-hiddenLayer.project(outputLayer);
-
-const myNetwork = new Network({
-    input: inputLayer,
-    hidden: [hiddenLayer],
-    output: outputLayer
-});
+const myNetwork = new Architect.Perceptron(625, 16, 16, 3);
 
 var trainer = new Trainer(myNetwork)
 
@@ -58,3 +48,7 @@ console.log("harusnya hasilnya", B[75].output)
 console.log("C :")
 console.log("coba C", cobaC)
 console.log("harusnya hasilnya", C[80].output)
+
+var exported = myNetwork.toJSON();
+exporter('okjon', exported);
+
