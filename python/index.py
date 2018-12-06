@@ -13,7 +13,7 @@ for i in range(len(data)):
     outputDataset = np.append(outputDataset, np.array([data[i]["output"]]), axis=0)
 
 # iterasi:
-epoch = 100000
+epoch = 10000
 
 # inisialisasi weight random dari -1 ke 1 :
 inputShape = inputDataset.shape    # tuple baris, kolom
@@ -24,8 +24,8 @@ print(inputShape)
 print("outputShape")
 print(outputShape)
 """
-weight1 = 2 * np.random.random((inputShape[1], inputShape[0])) - 1 
-weight2 = 2 * np.random.random((outputShape[0], 3)) - 1
+weight1 = 2 * np.random.random((625, 18)) - 1 
+weight2 = 2 * np.random.random((18, 3)) - 1
 """
 print("weight1")
 print(weight1.shape)
@@ -39,7 +39,7 @@ def sigmoid(x, d):
     elif d == False:
         return 1/(1+np.exp(-x))
 
-for j in range(epoch):
+for i in range(epoch):
     # feed forward
     inputLayer = inputDataset
     hiddenLayer = sigmoid(np.dot(inputLayer, weight1), False)
@@ -69,4 +69,13 @@ for j in range(epoch):
     """
     weight2 += hiddenLayer.T.dot(delta2)
     weight1 += inputLayer.T.dot(delta1)
-    
+
+
+# test
+inputTest = data[2]["input"]
+hiddenLayerTest = sigmoid(np.dot(inputTest, weight1), False)
+outputLayerTest = sigmoid(np.dot(hiddenLayerTest, weight2), False)
+
+print(outputLayerTest)
+print(data[2]["output"])
+
