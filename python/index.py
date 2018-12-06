@@ -13,13 +13,25 @@ for i in range(len(data)):
     outputDataset = np.append(outputDataset, np.array([data[i]["output"]]), axis=0)
 
 # iterasi:
-epoch = 5000
+epoch = 100000
+
 # inisialisasi weight random dari -1 ke 1 :
 inputShape = inputDataset.shape    # tuple baris, kolom
 outputShape = outputDataset.shape
+"""
+print("inputShape")
+print(inputShape)
+print("outputShape")
+print(outputShape)
+"""
 weight1 = 2 * np.random.random((inputShape[1], inputShape[0])) - 1 
-weight2 = 2 * np.random.random((outputShape[0], 1)) - 1
-
+weight2 = 2 * np.random.random((outputShape[0], 3)) - 1
+"""
+print("weight1")
+print(weight1.shape)
+print("weight2")
+print(weight2.shape)
+"""
 def sigmoid(x, d):
     #d -> derivatif
     if d == True:
@@ -40,20 +52,29 @@ for j in range(epoch):
     inputLayer = inputDataset
     hiddenLayer = sigmoid(np.dot(inputLayer, weight1), False)
     outputLayer = sigmoid(np.dot(hiddenLayer, weight2), False)
+    """
+    print("hiddenLayer")
+    print(hiddenLayer.shape)
+    print("outputLayer")
+    print(outputLayer.shape)
+    """
     # propagate
     outputError = outputDataset - outputLayer
     delta2 = outputError * sigmoid(outputLayer, True)
-    
-    #print(delta2.shape)
-    #print(weight2.T.shape)
+    """
+    print("delta2")
+    print(delta2.shape)
+    """
     print ("Error:" + str(np.mean(np.abs(outputError))))
     
-    hiddenError = delta2.T.dot(weight2)
+    hiddenError = delta2.dot(weight2.T)
     delta1 = hiddenError * sigmoid(hiddenLayer, True)
-    
-    print(hiddenLayer.shape)
-    print(delta2.shape)
-    #hiddenLayer.dot(delta2)
-    #weight1 += hidden.dot(hiddenLayer)
-    #weight2 += delta1.T.dot(inputLayer)
+    """
+    print("hiddenError")
+    print(hiddenError.shape)
+    print("delta1")
+    print(delta1.shape)
+    """
+    weight2 += hiddenLayer.T.dot(delta2)
+    weight1 += inputLayer.T.dot(delta1)
     
