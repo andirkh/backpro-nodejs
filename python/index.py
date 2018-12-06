@@ -2,80 +2,74 @@ import json
 import numpy as np
 
 # input dataset :
-with open('../res/campur.json') as f:
-    data = json.load(f)
-
 inputDataset = np.empty((0,625), int)
 outputDataset = np.empty((0, 3), int)
+
+with open('../res/campur.json') as f:
+    data = json.load(f)
 
 for i in range(len(data)):
     inputDataset = np.append(inputDataset, np.array([data[i]["input"]]), axis=0)
     outputDataset = np.append(outputDataset, np.array([data[i]["output"]]), axis=0)
 
-# iterasi:
+# params :
 epoch = 10000
+target_error = 0.0013
+inputLen = 625 #atau inputDataset.shape[1]
+neurons = 16
+outputLen = 3 #atau outputDataset.shape[1]
+weight1 = 2 * np.random.random((inputLen, neurons)) - 1 
+weight2 = 2 * np.random.random((neurons, outputLen)) - 1
 
-# inisialisasi weight random dari -1 ke 1 :
-inputShape = inputDataset.shape    # tuple baris, kolom
-outputShape = outputDataset.shape
-"""
-print("inputShape")
-print(inputShape)
-print("outputShape")
-print(outputShape)
-"""
-weight1 = 2 * np.random.random((625, 18)) - 1 
-weight2 = 2 * np.random.random((18, 3)) - 1
-"""
-print("weight1")
-print(weight1.shape)
-print("weight2")
-print(weight2.shape)
-"""
-def sigmoid(x, d):
-    #d -> derivatif
-    if d == True:
-        return x * (1 - x)
-    elif d == False:
-        return 1/(1+np.exp(-x))
+# activation func :
+def sigmoid(x):
+    return 1/(1+np.exp(-x))
 
-for i in range(epoch):
-    # feed forward
-    inputLayer = inputDataset
-    hiddenLayer = sigmoid(np.dot(inputLayer, weight1), False)
-    outputLayer = sigmoid(np.dot(hiddenLayer, weight2), False)
-    """
-    print("hiddenLayer")
-    print(hiddenLayer.shape)
-    print("outputLayer")
-    print(outputLayer.shape)
-    """
-    # propagate
-    outputError = outputDataset - outputLayer
-    delta2 = outputError * sigmoid(outputLayer, True)
-    """
-    print("delta2")
-    print(delta2.shape)
-    """
-    print ("Err:" + str(np.mean(np.abs(outputError))))
+def grad_sigmoid(x):
+    return x * (1 -x)
+
+def rms():
+    global error_rms
+    error_rms = np.sqrt(np.mean(np.square(outputError)))
+    return error_rms 
+
+def feed_forward(data):
+    global inputLayer, hiddenLayer, outputLayer
     
+    inputLayer = data
+    hiddenLayer = sigmoid(np.dot(inputLayer, weight1))
+    outputLayer = sigmoid(np.dot(hiddenLayer, weight2))
+
+def propagate():
+    global outputError, delta2, hiddenError, delta1
+    outputError = outputDataset - outputLayer
+    delta2 = outputError * grad_sigmoid(outputLayer)
     hiddenError = delta2.dot(weight2.T)
-    delta1 = hiddenError * sigmoid(hiddenLayer, True)
-    """
-    print("hiddenError")
-    print(hiddenError.shape)
-    print("delta1")
-    print(delta1.shape)
-    """
+    delta1 = hiddenError * grad_sigmoid(hiddenLayer)
+    print ("Err:" + str(rms()))
+
+def adjust_weight():
+    global weight2, weight1
     weight2 += hiddenLayer.T.dot(delta2)
     weight1 += inputLayer.T.dot(delta1)
 
+def predict(data, outputTest):
+    inputTest = data
+    hiddenTest = sigmoid(np.dot(inputTest, weight1))
+    output = sigmoid(np.dot(hiddenTest, weight2))
+    print(outputTest)
+    print(output)
 
-# test
-inputTest = data[2]["input"]
-hiddenLayerTest = sigmoid(np.dot(inputTest, weight1), False)
-outputLayerTest = sigmoid(np.dot(hiddenLayerTest, weight2), False)
 
-print(outputLayerTest)
-print(data[2]["output"])
+i = 1
+while i < epoch:
+    feed_forward(inputDataset)
+    propagate()
+    adjust_weight()
+    if error_rms < target_error:
+        break
+    i += 1
+
+# test / predict:
+predict(data[2]["input"], data[2]["output"])
 
