@@ -21,6 +21,7 @@ outputLen = 3 #atau outputDataset.shape[1]
 weight1 = 2 * np.random.random((inputLen, neurons)) - 1 
 weight2 = 2 * np.random.random((neurons, outputLen)) - 1
 
+
 # activation func :
 def sigmoid(x):
     return 1/(1+np.exp(-x))
@@ -60,16 +61,26 @@ def predict(data, outputTest):
     print(outputTest)
     print(output)
 
+def trainer():
+    i = 1
+    while i < epoch:
+        feed_forward(inputDataset)
+        propagate()
+        adjust_weight()
+        if error_rms < target_error:
+            break
+        i += 1
 
-i = 1
-while i < epoch:
-    feed_forward(inputDataset)
-    propagate()
-    adjust_weight()
-    if error_rms < target_error:
-        break
-    i += 1
+def save_weights():
+    np.save("./export_weights/weight1.npy", weight1)
+    np.save("./export_weights/weight2.npy", weight2)
 
-# test / predict:
-predict(data[2]["input"], data[2]["output"])
 
+def main():
+    # Training :
+    trainer()
+    # test / predict:
+    predict(data[2]["input"], data[2]["output"])
+
+if __name__ == "__main__":
+    main()
